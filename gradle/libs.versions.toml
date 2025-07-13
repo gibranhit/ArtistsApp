@@ -19,6 +19,14 @@ viewModelCompose = "2.9.1"
 coroutines = "1.10.2"
 ksp = "2.2.0-2.0.2"
 paging = "3.3.6"
+coroutinesTest = "1.10.2"
+mockk = "1.14.4"
+turbine = "1.2.1"
+archCoreTesting = "2.2.0"
+pagingTesting = "3.3.6"
+mockito = "5.18.0"
+mockitoKotlin = "5.4.0"
+mockitoInline = "5.2.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -51,6 +59,15 @@ viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-
 coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 paging-runtime = { group = "androidx.paging", name = "paging-runtime", version.ref = "paging" }
 paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
+# Testing libraries
+coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
+arch-core-testing = { group = "androidx.arch.core", name = "core-testing", version.ref = "archCoreTesting" }
+paging-testing = { group = "androidx.paging", name = "paging-testing", version.ref = "pagingTesting" }
+mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
+mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockitoKotlin" }
+mockito-inline = { group = "org.mockito", name = "mockito-inline", version.ref = "mockitoInline" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
