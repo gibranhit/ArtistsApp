@@ -39,6 +39,10 @@ data class ComponentSizes(
     val loadingIndicatorMd: Dp = 24.dp,
     val loadingIndicatorLg: Dp = 32.dp,
 
+    val screenPadding: Dp = 16.dp,
+    val cardPadding: Dp = 12.dp,
+    val itemSpacing: Dp = 8.dp,
+
     val minTouchTarget: Dp = 48.dp
 )
 

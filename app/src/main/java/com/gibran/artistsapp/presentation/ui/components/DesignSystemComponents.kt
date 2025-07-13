@@ -31,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import com.gibran.artistsapp.R
 import com.gibran.artistsapp.ui.theme.componentSizes
 import com.gibran.artistsapp.ui.theme.cornerRadius
@@ -150,76 +151,57 @@ fun ErrorCard(
     title: String = stringResource(R.string.error_title),
     onRetry: () -> Unit,
 ) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.errorContainer
-        ),
-        shape = RoundedCornerShape(cornerRadius.md)
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
     ) {
-        Column(
-            modifier = Modifier.padding(spacing.md),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(spacing.sm)
+        Card(
+            modifier = modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.errorContainer
+            ),
+            shape = RoundedCornerShape(cornerRadius.md)
         ) {
-            Icon(
-                imageVector = Icons.Default.Warning,
-                contentDescription = stringResource(R.string.auth_warning_description),
-                tint = MaterialTheme.colorScheme.onErrorContainer,
-                modifier = Modifier.size(componentSizes.iconMd)
-            )
-            Text(
-                text = title,
-                style = MaterialTheme.typography.headlineSmall,
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = message,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onErrorContainer,
-                textAlign = TextAlign.Center
-            )
-            SecondaryButton(
-                text = stringResource(R.string.retry_button),
-                onClick = onRetry
-            )
+            Column(
+                modifier = Modifier.padding(spacing.md),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(spacing.sm)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onErrorContainer,
+                    modifier = Modifier.size(componentSizes.iconMd)
+                )
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.headlineSmall,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    textAlign = TextAlign.Center
+                )
+                SecondaryButton(
+                    text = stringResource(R.string.retry_button),
+                    onClick = onRetry
+                )
+            }
         }
     }
 }
 
-// MARK: - Button Components
-
-@OptIn(ExperimentalMaterial3Api::class)
+@Preview
 @Composable
-fun PrimaryButton(
-    text: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true
-) {
-    Card(
-        onClick = onClick,
-        modifier = modifier,
-        enabled = enabled,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            disabledContainerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
-        ),
-        shape = RoundedCornerShape(cornerRadius.md)
-    ) {
-        Text(
-            text = text,
-            modifier = Modifier.padding(
-                horizontal = spacing.lg,
-                vertical = spacing.sm
-            ),
-            color = if (enabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface.copy(
-                alpha = 0.38f
-            ),
-            style = MaterialTheme.typography.labelLarge
-        )
-    }
+fun ErrorCardPreview() {
+    ErrorCard(
+        title = "Error Title",
+        message = "This is a long error message that should wrap to multiple lines if necessary.",
+        onRetry = {}
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -254,8 +236,6 @@ fun SecondaryButton(
     }
 }
 
-// MARK: - Text Components
-
 @Composable
 fun TitleText(
     text: String,
@@ -288,8 +268,6 @@ fun SubtitleText(
         overflow = TextOverflow.Ellipsis
     )
 }
-
-// MARK: - Enums
 
 enum class LoadingSize {
     Small, Medium, Large
