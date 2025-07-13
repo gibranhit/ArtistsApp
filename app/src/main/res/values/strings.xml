@@ -42,4 +42,11 @@
 
     <!-- Navigation -->
     <string name="back_button">Back</string>
+
+    <!-- Release Detail Screen -->
+    <string name="album_details_title">Album Details</string>
+    <string name="loading_album_details">Loading album details…</string>
+    <string name="genres_label">Genres: %1$s</string>
+    <string name="styles_label">Styles: %1$s</string>
+    <string name="tracklist_title">Tracklist</string>
 </resources>

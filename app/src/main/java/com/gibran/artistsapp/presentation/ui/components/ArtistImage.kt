@@ -17,6 +17,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import coil.ImageLoader
 import com.gibran.artistsapp.ui.theme.componentSizes
 import com.gibran.artistsapp.ui.theme.cornerRadius
 
@@ -25,6 +26,7 @@ fun ArtistImage(
     imageUrl: String?,
     contentDescription: String?,
     modifier: Modifier = Modifier,
+    imageLoader: ImageLoader = coil.Coil.imageLoader(LocalContext.current)
 ) {
 
     val context = LocalContext.current
@@ -47,9 +49,11 @@ fun ArtistImage(
             AsyncImage(
                 model = ImageRequest.Builder(context)
                     .data(imageUrl)
-                    .crossfade(true)
+                    .memoryCacheKey(imageUrl)
+                    .diskCacheKey(imageUrl)
                     .build(),
                 contentDescription = contentDescription,
+                imageLoader = imageLoader,
                 modifier = Modifier.size(componentSizes.artistImageMd),
                 contentScale = ContentScale.Crop
             )

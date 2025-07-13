@@ -1,5 +1,6 @@
 package com.gibran.artistsapp.presentation.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,6 +14,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import androidx.compose.ui.platform.LocalContext
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.LoadState
@@ -67,7 +70,8 @@ fun DiscographyScreen(
     artistId: Long,
     artistName: String,
     viewModel: DiscographyViewModel = hiltViewModel(),
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    onReleaseClick: (Long) -> Unit = {}
 ) {
     val releases = viewModel.releases.collectAsLazyPagingItems()
     val currentFilter by viewModel.currentFilterState.collectAsState()
@@ -91,7 +95,8 @@ fun DiscographyScreen(
             currentFilter = currentFilter,
             onFilterApply = { filter ->
                 viewModel.onIntent(DiscographyIntent.ApplyFilter(artistId, filter))
-            }
+            },
+            onReleaseClick = onReleaseClick
         )
     }
 }
@@ -100,7 +105,8 @@ fun DiscographyScreen(
 private fun DiscographyContent(
     releases: LazyPagingItems<Release>,
     currentFilter: DiscographyFilter,
-    onFilterApply: (DiscographyFilter) -> Unit
+    onFilterApply: (DiscographyFilter) -> Unit,
+    onReleaseClick: (Long) -> Unit
 ) {
     Column {
         SortBar(
@@ -142,7 +148,7 @@ private fun DiscographyContent(
                         )
                     }
                 } else {
-                    ReleasesContent(releases = releases)
+                    ReleasesContent(releases = releases, onReleaseClick = onReleaseClick)
                 }
             }
         }
@@ -150,7 +156,7 @@ private fun DiscographyContent(
 }
 
 @Composable
-private fun ReleasesContent(releases: LazyPagingItems<Release>) {
+private fun ReleasesContent(releases: LazyPagingItems<Release>, onReleaseClick: (Long) -> Unit) {
     LazyColumn(
         contentPadding = PaddingValues(spacing.md),
         verticalArrangement = Arrangement.spacedBy(spacing.sm)
@@ -158,7 +164,7 @@ private fun ReleasesContent(releases: LazyPagingItems<Release>) {
         items(count = releases.itemCount) { index ->
             val release = releases[index]
             release?.let {
-                ReleaseCard(release = it)
+                ReleaseCard(release = it, onReleaseClick = onReleaseClick)
             }
         }
 
@@ -252,9 +258,11 @@ private fun SortBar(
 }
 
 @Composable
-private fun ReleaseCard(release: Release) {
+private fun ReleaseCard(release: Release, onReleaseClick: (Long) -> Unit) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onReleaseClick(release.id) },
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Row(
@@ -262,8 +270,13 @@ private fun ReleaseCard(release: Release) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Album cover
+            val context = LocalContext.current
             AsyncImage(
-                model = release.imageUrl,
+                model = ImageRequest.Builder(context)
+                    .data(release.thumb)
+                    .memoryCacheKey(release.thumb)
+                    .diskCacheKey(release.thumb)
+                    .build(),
                 contentDescription = release.title,
                 modifier = Modifier
                     .size(componentSizes.artistImageMd)
@@ -300,14 +313,11 @@ private fun ReleaseCard(release: Release) {
                     )
                 }
 
-                release.label?.let {
-                    Spacer(Modifier.height(spacing.xs))
-                    Text(
-                        text = it,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                Text(
+                    text = "Role: ${release.role}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }
@@ -322,10 +332,7 @@ private fun ReleaseCardPreview() {
         year = 1991,
         type = "Album",
         role = "Main",
-        imageUrl = "https://placehold.co/200",
-        label = "DGC Records",
-        genre = "Grunge",
-        format = "Vinyl"
+        thumb = "https://placehold.co/200"
     )
-    ReleaseCard(sampleRelease)
+    ReleaseCard(release = sampleRelease, onReleaseClick = {})
 }

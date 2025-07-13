@@ -10,6 +10,7 @@ import androidx.navigation.toRoute
 import com.gibran.artistsapp.presentation.ui.ArtistDetailScreen
 import com.gibran.artistsapp.presentation.ui.ArtistSearchScreen
 import com.gibran.artistsapp.presentation.ui.DiscographyScreen
+import com.gibran.artistsapp.presentation.ui.ReleaseDetailScreen
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -25,6 +26,11 @@ data class ArtistDetailDestination(
 data class DiscographyDestination(
     val artistId: Long,
     val artistName: String
+)
+
+@Serializable
+data class ReleaseDetailDestination(
+    val releaseId: Long
 )
 
 @Composable
@@ -61,6 +67,17 @@ fun AppNavigation(
             DiscographyScreen(
                 artistId = args.artistId,
                 artistName = args.artistName,
+                onBackClick = { navController.popBackStack() },
+                onReleaseClick = { releaseId ->
+                    navController.navigate(ReleaseDetailDestination(releaseId))
+                }
+            )
+        }
+
+        composable<ReleaseDetailDestination> { backStackEntry ->
+            val args = backStackEntry.toRoute<ReleaseDetailDestination>()
+            ReleaseDetailScreen(
+                releaseId = args.releaseId,
                 onBackClick = { navController.popBackStack() }
             )
         }

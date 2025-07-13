@@ -1,4 +1,4 @@
-package com.gibran.artistsapp.util
+package com.gibran.artistsapp.di
 
 import dagger.Module
 import dagger.Provides

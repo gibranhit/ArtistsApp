@@ -21,7 +21,7 @@ suspend fun <T> safeApiCall(
     runCatching {
         val response = try {
             apiCall()
-        } catch (io: IOException) {
+        } catch (_: IOException) {
             throw NetworkUnavailableException()
         }
 

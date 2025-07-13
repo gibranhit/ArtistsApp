@@ -28,6 +28,8 @@ data class ComponentSizes(
     val artistImageLg: Dp = 80.dp,
     val artistImageXl: Dp = 120.dp,
 
+    val albumCoverLarge: Dp = 300.dp,
+
     val buttonHeightSm: Dp = 32.dp,
     val buttonHeightMd: Dp = 40.dp,
     val buttonHeightLg: Dp = 48.dp,

@@ -49,17 +49,16 @@ import com.gibran.artistsapp.presentation.ui.components.LoadingMoreIndicator
 import com.gibran.artistsapp.presentation.ui.components.SubtitleText
 import com.gibran.artistsapp.presentation.ui.components.TitleText
 import com.gibran.artistsapp.presentation.viewmodel.ArtistSearchIntent
-import com.gibran.artistsapp.presentation.viewmodel.ArtistSearchPagingViewModel
+import com.gibran.artistsapp.presentation.viewmodel.ArtistSearchViewModel
 import com.gibran.artistsapp.ui.theme.ArtistsAppTheme
 import com.gibran.artistsapp.ui.theme.componentSizes
 import com.gibran.artistsapp.ui.theme.spacing
-import kotlinx.coroutines.flow.retry
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ArtistSearchScreen(
     onArtistClick: (Long) -> Unit,
-    viewModel: ArtistSearchPagingViewModel = hiltViewModel()
+    viewModel: ArtistSearchViewModel = hiltViewModel()
 ) {
     val searchQuery by viewModel.searchQuery.collectAsState()
     val isSearchEmpty by viewModel.isSearchEmpty.collectAsState()

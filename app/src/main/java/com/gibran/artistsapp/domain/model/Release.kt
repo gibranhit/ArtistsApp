@@ -4,12 +4,25 @@ data class Release(
     val id: Long,
     val title: String,
     val year: Int?,
-    val type: String, // album, single, compilation, etc.
-    val role: String, // main, appearance, etc.
-    val imageUrl: String?,
-    val label: String?,
-    val genre: String?,
-    val format: String? // vinyl, cd, digital, etc.
+    val type: String,
+    val role: String,
+    val thumb: String?
+)
+
+data class ReleaseDetail(
+    val id: Long,
+    val title: String,
+    val year: Int?,
+    val genres: List<String>,
+    val styles: List<String>,
+    val tracklist: List<Track>,
+    val images: List<Image>?,
+)
+
+data class Track(
+    val position: String,
+    val title: String,
+    val duration: String?
 )
 
 data class ReleasesResult(

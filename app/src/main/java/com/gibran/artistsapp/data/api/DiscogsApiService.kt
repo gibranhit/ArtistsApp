@@ -3,6 +3,7 @@ package com.gibran.artistsapp.data.api
 import com.gibran.artistsapp.data.response.ArtistSearchResponse
 import com.gibran.artistsapp.data.response.ArtistDetailResponse
 import com.gibran.artistsapp.data.response.ReleasesResponse
+import com.gibran.artistsapp.data.response.ReleaseDetailResponse
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -31,6 +32,11 @@ interface DiscogsApiService {
         @Query("per_page") perPage: Int = 30,
         @Query("page") page: Int = 1
     ): Response<ReleasesResponse>
+
+    @GET("releases/{id}")
+    suspend fun getReleaseDetails(
+        @Path("id") id: Long
+    ): Response<ReleaseDetailResponse>
 
     companion object {
         const val USER_AGENT_HEADER: String = "User-Agent"
