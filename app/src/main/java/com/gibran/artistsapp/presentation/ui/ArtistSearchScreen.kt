@@ -1,6 +1,6 @@
 package com.gibran.artistsapp.presentation.ui
 
-import android.R.attr.enabled
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -23,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -40,17 +41,19 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.gibran.artistsapp.R
 import com.gibran.artistsapp.domain.model.Artist
-import com.gibran.artistsapp.presentation.ui.components.ArtistImageSize
+import com.gibran.artistsapp.presentation.ui.components.ArtistImage
 import com.gibran.artistsapp.presentation.ui.components.EmptyState
 import com.gibran.artistsapp.presentation.ui.components.ErrorCard
 import com.gibran.artistsapp.presentation.ui.components.LoadingContent
 import com.gibran.artistsapp.presentation.ui.components.LoadingMoreIndicator
 import com.gibran.artistsapp.presentation.ui.components.SubtitleText
 import com.gibran.artistsapp.presentation.ui.components.TitleText
+import com.gibran.artistsapp.presentation.viewmodel.ArtistSearchIntent
 import com.gibran.artistsapp.presentation.viewmodel.ArtistSearchPagingViewModel
 import com.gibran.artistsapp.ui.theme.ArtistsAppTheme
+import com.gibran.artistsapp.ui.theme.componentSizes
 import com.gibran.artistsapp.ui.theme.spacing
-
+import kotlinx.coroutines.flow.retry
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,14 +62,17 @@ fun ArtistSearchScreen(
     viewModel: ArtistSearchPagingViewModel = hiltViewModel()
 ) {
     val searchQuery by viewModel.searchQuery.collectAsState()
+    val isSearchEmpty by viewModel.isSearchEmpty.collectAsState()
     val artists = viewModel.artistsPagingFlow.collectAsLazyPagingItems()
 
     ArtistSearchContent(
         searchQuery = searchQuery,
+        isSearchEmpty = isSearchEmpty,
         artists = artists,
         onArtistClick = onArtistClick,
-        onQueryChange = viewModel::updateSearchQuery,
-        onClearClick = viewModel::clearSearch,
+        onQueryChange = { query -> viewModel.onIntent(ArtistSearchIntent.Search(query)) },
+        onClearClick = { viewModel.onIntent(ArtistSearchIntent.ClearSearch) },
+        onRetry = { artists.retry() },
     )
 }
 
@@ -74,10 +80,12 @@ fun ArtistSearchScreen(
 @Composable
 fun ArtistSearchContent(
     searchQuery: String,
+    isSearchEmpty: Boolean,
     artists: LazyPagingItems<Artist>,
     onArtistClick: (Long) -> Unit,
     onQueryChange: (String) -> Unit,
     onClearClick: () -> Unit,
+    onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -85,7 +93,6 @@ fun ArtistSearchContent(
             .fillMaxSize()
             .padding(spacing.md)
     ) {
-        // Search Bar
         SearchBar(
             query = searchQuery,
             onQueryChange = onQueryChange,
@@ -94,26 +101,26 @@ fun ArtistSearchContent(
 
         Spacer(modifier = Modifier.height(spacing.md))
 
-        // Content
         when {
-            searchQuery.isBlank() -> {
+            isSearchEmpty -> {
                 EmptyState(
                     icon = Icons.Default.Search,
                     title = stringResource(R.string.empty_state_title),
                     subtitle = stringResource(R.string.empty_state_subtitle)
                 )
             }
+
             else -> {
                 ArtistPagingList(
                     artists = artists,
-                    onArtistClick = onArtistClick
+                    onArtistClick = onArtistClick,
+                    onRetry = onRetry
                 )
             }
         }
     }
 }
 
-// MARK: - Components
 
 @Composable
 private fun SearchBar(
@@ -125,8 +132,8 @@ private fun SearchBar(
     OutlinedTextField(
         value = query,
         onValueChange = onQueryChange,
-        label = { androidx.compose.material3.Text(stringResource(R.string.search_label)) },
-        placeholder = { androidx.compose.material3.Text(stringResource(R.string.search_hint)) },
+        label = { Text(stringResource(R.string.search_label)) },
+        placeholder = { Text(stringResource(R.string.search_hint)) },
         leadingIcon = {
             Icon(
                 imageVector = Icons.Default.Search,
@@ -152,7 +159,8 @@ private fun SearchBar(
 @Composable
 private fun ArtistPagingList(
     artists: LazyPagingItems<Artist>,
-    onArtistClick: (Long) -> Unit
+    onArtistClick: (Long) -> Unit,
+    onRetry: () -> Unit
 ) {
     LazyColumn(
         contentPadding = PaddingValues(vertical = spacing.sm),
@@ -170,44 +178,46 @@ private fun ArtistPagingList(
                 )
             }
         }
-
-        // Handle append loading states
-        when (artists.loadState.append) {
+        when (val refreshState = artists.loadState.append) {
             is LoadState.Loading -> {
                 item {
                     LoadingMoreIndicator()
                 }
             }
+
             is LoadState.Error -> {
                 item {
                     ErrorCard(
-                        message = stringResource(R.string.error_load_more),
+                        message = refreshState.error.localizedMessage
+                            ?: stringResource(R.string.error_load_more),
                         onRetry = { artists.retry() }
                     )
                 }
             }
+
             is LoadState.NotLoading -> {
-                // No additional loading indicator needed
+                // No more items to load or not loading
             }
         }
     }
 
-    // Handle initial loading and error states
     when (artists.loadState.refresh) {
         is LoadState.Loading -> {
             if (artists.itemCount == 0) {
                 LoadingContent(message = stringResource(R.string.loading_message))
             }
         }
+
         is LoadState.Error -> {
             if (artists.itemCount == 0) {
                 ErrorCard(
                     message = (artists.loadState.refresh as LoadState.Error).error.message
                         ?: stringResource(R.string.error_generic),
-                    onRetry = { artists.refresh() }
+                    onRetry = onRetry
                 )
             }
         }
+
         is LoadState.NotLoading -> {
             if (artists.itemCount == 0) {
                 EmptyState(
@@ -236,16 +246,15 @@ fun ArtistItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(spacing.md),
+                .padding(componentSizes.cardPadding),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            com.gibran.artistsapp.presentation.ui.components.ArtistImage(
+            ArtistImage(
                 imageUrl = artist.imageUrl,
                 contentDescription = artist.name,
-                size = ArtistImageSize.Medium
             )
 
-            Spacer(modifier = Modifier.width(spacing.md))
+            Spacer(modifier = Modifier.width(spacing.sm))
 
             Column(
                 modifier = Modifier.weight(1f)
@@ -291,16 +300,6 @@ class ArtistPreviewParameterProvider : PreviewParameterProvider<Artist> {
     )
 }
 
-class SearchQueryPreviewParameterProvider : PreviewParameterProvider<String> {
-    override val values = sequenceOf(
-        "",
-        "Radiohead",
-        "The Beatles"
-    )
-}
-
-// MARK: - Previews
-
 @Preview(name = "Empty State", showBackground = true)
 @Composable
 private fun ArtistSearchContentEmptyPreview() {
@@ -320,8 +319,8 @@ private fun ArtistSearchContentEmptyPreview() {
 
             EmptyState(
                 icon = Icons.Default.Search,
-                title = "Search for your favorite artists",
-                subtitle = "Enter an artist name to get started"
+                title = stringResource(R.string.empty_state_title),
+                subtitle = stringResource(R.string.empty_state_subtitle)
             )
         }
     }
@@ -471,7 +470,7 @@ private fun ArtistListPreview() {
 @Preview(
     name = "Dark Theme",
     showBackground = true,
-    uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES
+    uiMode = Configuration.UI_MODE_NIGHT_YES
 )
 @Composable
 private fun ArtistSearchContentDarkPreview() {
@@ -522,8 +521,8 @@ private fun ArtistSearchContentLandscapePreview() {
 
             EmptyState(
                 icon = Icons.Default.Search,
-                title = "Search for your favorite artists",
-                subtitle = "Enter an artist name to get started"
+                title = stringResource(R.string.empty_state_title),
+                subtitle = stringResource(R.string.empty_state_subtitle)
             )
         }
     }

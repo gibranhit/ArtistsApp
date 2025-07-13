@@ -1,8 +1,11 @@
 package com.gibran.artistsapp.data.api
 
 import com.gibran.artistsapp.data.response.ArtistSearchResponse
+import com.gibran.artistsapp.data.response.ArtistDetailResponse
+import com.gibran.artistsapp.data.response.ReleasesResponse
 import retrofit2.Response
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface DiscogsApiService {
@@ -14,6 +17,20 @@ interface DiscogsApiService {
         @Query("per_page") perPage: Int = 30,
         @Query("page") page: Int = 1
     ): Response<ArtistSearchResponse>
+
+    @GET("artists/{id}")
+    suspend fun getArtistDetails(
+        @Path("id") id: Long
+    ): Response<ArtistDetailResponse>
+
+    @GET("artists/{id}/releases")
+    suspend fun getArtistReleases(
+        @Path("id") id: Long,
+        @Query("sort") sort: String = "year",
+        @Query("sort_order") sortOrder: String = "desc",
+        @Query("per_page") perPage: Int = 30,
+        @Query("page") page: Int = 1
+    ): Response<ReleasesResponse>
 
     companion object {
         const val USER_AGENT_HEADER: String = "User-Agent"

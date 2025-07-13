@@ -1,8 +1,6 @@
 package com.gibran.artistsapp.data.response
 
 import com.gibran.artistsapp.domain.model.Artist
-import com.gibran.artistsapp.domain.model.Pagination
-import com.gibran.artistsapp.domain.model.SearchResult
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
@@ -12,14 +10,7 @@ data class ArtistSearchResponse(
     val results: List<ArtistResponse>,
     @Json(name = "pagination")
     val pagination: PaginationResponse
-) {
-    fun toDomain(): SearchResult<Artist> {
-        return SearchResult(
-            items = results.map { it.toDomain() },
-            pagination = pagination.toDomain()
-        )
-    }
-}
+)
 
 @JsonClass(generateAdapter = true)
 data class ArtistResponse(
@@ -61,17 +52,7 @@ data class PaginationResponse(
     val pages: Int,
     @Json(name = "urls")
     val urls: PaginationUrlsResponse?
-) {
-    fun toDomain(): Pagination {
-        return Pagination(
-            perPage = perPage,
-            items = items,
-            page = page,
-            pages = pages,
-            hasNext = urls?.next != null
-        )
-    }
-}
+)
 
 @JsonClass(generateAdapter = true)
 data class PaginationUrlsResponse(

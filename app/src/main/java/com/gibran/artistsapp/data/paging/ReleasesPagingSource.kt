@@ -3,32 +3,36 @@ package com.gibran.artistsapp.data.paging
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.gibran.artistsapp.data.api.DiscogsApiService
-import com.gibran.artistsapp.domain.model.Artist
+import com.gibran.artistsapp.domain.model.Release
+import com.gibran.artistsapp.domain.model.DiscographyFilter
 import retrofit2.HttpException
 import java.io.IOException
 
-class ArtistPagingSource(
+class ReleasesPagingSource(
     private val apiService: DiscogsApiService,
-    private val query: String
-) : PagingSource<Int, Artist>() {
+    private val artistId: Long,
+    private val filter: DiscographyFilter
+) : PagingSource<Int, Release>() {
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Artist> {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Release> {
         val page = params.key ?: 1
 
         return try {
-            val response = apiService.searchArtists(
-                query = query,
-                page = page
+            val response = apiService.getArtistReleases(
+                id = artistId,
+                page = page,
+                sort = filter.sortBy.apiSort,
+                sortOrder = filter.sortBy.apiOrder
             )
 
             if (response.isSuccessful) {
-                val searchResponse = response.body()!!
-                val artists = searchResponse.results.map { it.toDomain() }
+                val releasesResponse = response.body()!!
+                val releases = releasesResponse.releases.map { it.toDomain() }
 
                 LoadResult.Page(
-                    data = artists,
+                    data = releases,
                     prevKey = if (page == 1) null else page - 1,
-                    nextKey = if (searchResponse.pagination.page < searchResponse.pagination.pages) {
+                    nextKey = if (releasesResponse.pagination.page < releasesResponse.pagination.pages) {
                         page + 1
                     } else null
                 )
@@ -46,7 +50,7 @@ class ArtistPagingSource(
         }
     }
 
-    override fun getRefreshKey(state: PagingState<Int, Artist>): Int? {
+    override fun getRefreshKey(state: PagingState<Int, Release>): Int? {
         return state.anchorPosition?.let { anchorPosition ->
             val anchorPage = state.closestPageToPosition(anchorPosition)
             anchorPage?.prevKey?.plus(1) ?: anchorPage?.nextKey?.minus(1)
