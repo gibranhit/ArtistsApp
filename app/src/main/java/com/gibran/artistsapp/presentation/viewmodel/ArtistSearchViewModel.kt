@@ -24,7 +24,7 @@ sealed interface ArtistSearchIntent {
 }
 
 @HiltViewModel
-class ArtistSearchPagingViewModel @Inject constructor(
+class ArtistSearchViewModel @Inject constructor(
     private val searchArtistsUseCase: SearchArtistsUseCase
 ) : ViewModel() {
 
