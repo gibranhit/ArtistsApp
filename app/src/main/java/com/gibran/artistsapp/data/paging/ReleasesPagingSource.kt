@@ -45,8 +45,6 @@ class ReleasesPagingSource(
             LoadResult.Error(exception)
         } catch (exception: HttpException) {
             LoadResult.Error(exception)
-        } catch (exception: Exception) {
-            LoadResult.Error(exception)
         }
     }
 
