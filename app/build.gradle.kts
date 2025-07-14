@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.detekt)
 }
 
 android {
@@ -105,4 +106,33 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+}
+
+detekt {
+    // Usar configuración personalizada
+    config.setFrom("$rootDir/config/detekt/detekt.yml")
+
+    // Construir sobre la configuración por defecto
+    buildUponDefaultConfig = true
+
+    // No activar todas las reglas automáticamente
+    allRules = false
+
+    // Autocorrección automática cuando sea posible
+    autoCorrect = true
+
+    // Ejecutar en paralelo para mejor rendimiento
+    parallel = true
+
+    // Fallar el build si hay issues
+    ignoreFailures = false
+
+    // Configurar reportes
+    reports {
+        html.required.set(true)
+        xml.required.set(true)
+        txt.required.set(false)
+        sarif.required.set(true)
+        md.required.set(false)
+    }
 }

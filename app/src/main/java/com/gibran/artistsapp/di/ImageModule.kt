@@ -13,6 +13,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+private const val MEMORY_CACHE_SIZE_PERCENT = 0.25
+private const val DISK_CACHE_SIZE_PERCENT = 0.02
+
 @Module
 @InstallIn(SingletonComponent::class)
 object ImageModule {
@@ -23,13 +26,13 @@ object ImageModule {
         return ImageLoader.Builder(context)
             .memoryCache {
                 MemoryCache.Builder(context)
-                    .maxSizePercent(0.25) // 25% of available memory
+                    .maxSizePercent(MEMORY_CACHE_SIZE_PERCENT)
                     .build()
             }
             .diskCache {
                 DiskCache.Builder()
                     .directory(context.cacheDir.resolve("image_cache"))
-                    .maxSizePercent(0.02) // 2% of available disk space
+                    .maxSizePercent(DISK_CACHE_SIZE_PERCENT)
                     .build()
             }
             .memoryCachePolicy(CachePolicy.ENABLED)

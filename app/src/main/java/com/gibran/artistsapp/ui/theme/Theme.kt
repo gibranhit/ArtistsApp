@@ -61,3 +61,4 @@ fun ArtistsAppTheme(
         content = content
     )
 }
+
